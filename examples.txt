@@ -20,16 +20,6 @@ template Service "unifi_controller" {
 // ╔═══════════════╗
 // ║ services.conf ║
 // ╚═══════════════╝
-apply Service "Unifi: angemeldete Nutzer" {
-	import "service-5m" //Template muss vorhanden sein!
-  import "unifi_controller"
-	check_command = "check_unifi45"
-  vars.unifi_module = "Count-Users"
-  vars.unifi_warning = "1"
-	vars.unifi_critical = "1"
-	assign where (host.address || host.address6) && "Unify-Server" in host.groups
-}
-
 apply Service "Unifi: angemeldete Nutzer (Site default)" {
 	import "service-5m" //Template muss vorhanden sein!
   import "unifi_controller"
