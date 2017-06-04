@@ -1,0 +1,181 @@
+// ╔═══════════════╗
+// ║ commands.conf ║
+// ╚═══════════════╝ 
+object CheckCommand "check_unifi45" {
+        import "plugin-check-command"
+        command = [ PluginDir + "/check_unifi45.sh", "-H", "$address$", "-P", "$unifi_port$", "-u", "$unifi_user$", "-p", "$unifi_password$", "-m", "$unifi_module$", "-w", "$unifi_warning$", "-c", "$unifi_critical$", "-s", "$unifi_site$", "-d", "$unifi_device$" ]
+}
+
+
+// ╔════════════════╗
+// ║ templates.conf ║
+// ╚════════════════╝
+template Service "unifi_controller" {
+	vars.unifi_user = "Nutzer-mit-Zugriff-auf-allen-Seiten"
+	vars.unifi_password = "PASSWORT-DES-NUTZERS"
+  vars.unifi_port = "8443"
+}
+
+
+// ╔═══════════════╗
+// ║ services.conf ║
+// ╚═══════════════╝
+apply Service "Unifi: angemeldete Nutzer" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Count-Users"
+  vars.unifi_warning = "1"
+	vars.unifi_critical = "1"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: angemeldete Nutzer (Site default)" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Count-Users"
+  vars.unifi_site = "default"
+  vars.unifi_warning = "1"
+	vars.unifi_critical = "1"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: angemeldete Nutzer (global)" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Count-Users"
+  vars.unifi_warning = "1"
+	vars.unifi_critical = "1"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: Alarmmeldungen vorhanden" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Active-Alarms"
+  vars.unifi_warning = "1"
+	vars.unifi_critical = "1"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: nicht erreichbare APs (Site default)" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Offline-APs"
+  vars.unifi_site = "default"
+  vars.unifi_warning = "1"
+	vars.unifi_critical = "1"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: nicht erreichbare APs (global)" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Offline-APs"
+  vars.unifi_warning = "1"
+	vars.unifi_critical = "1"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: vorhandene Updates für APs" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Has-Updates"
+  vars.unifi_warning = "1"
+	vars.unifi_critical = "1"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: nicht zugeordnete APs" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Not-Adopted"
+  vars.unifi_warning = "1"
+	vars.unifi_critical = "1"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: Updates für Controller" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Show-Updates"
+  vars.unifi_warning = "1"
+	vars.unifi_critical = "1"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: CPU-Auslastung AP 01" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Get-DeviceLoad"
+  vars.unifi_device = "11:22:33:44:55:66" //MAC-Adresse des APs
+  vars.unifi_warning = "2"
+	vars.unifi_critical = "3"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: Arbeitsspeicher AP 01" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Get-DeviceMem"
+  vars.unifi_device = "11:22:33:44:55:66" //MAC-Adresse des APs
+  vars.unifi_warning = "70"
+	vars.unifi_critical = "80"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: Nutzer auf AP 01" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Get-DeviceUsers"
+  vars.unifi_device = "11:22:33:44:55:66" //MAC-Adresse des APs
+  vars.unifi_warning = "10"
+	vars.unifi_critical = "15"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: Gäste auf AP 01" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Get-DeviceGuests"
+  vars.unifi_device = "11:22:33:44:55:66" //MAC-Adresse des APs
+  vars.unifi_warning = "10"
+	vars.unifi_critical = "15"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+apply Service "Unifi: letzter Kontakt zu AP 01" {
+	import "service-5m" //Template muss vorhanden sein!
+  import "unifi_controller"
+	check_command = "check_unifi45"
+  vars.unifi_module = "Show-DevLastSeen"
+  vars.unifi_device = "11:22:33:44:55:66" //MAC-Adresse des APs
+  vars.unifi_warning = "20"
+	vars.unifi_critical = "40"
+	assign where (host.address || host.address6) && "Unify-Server" in host.groups
+}
+
+
+// ╔════════════╗
+// ║ hosts.conf ║
+// ╚════════════╝
+object Host "unifi-controller.example.net"{
+	import  "generic-host"
+	
+	address = "10.10.20.1"
+	address6 = "2a00:1450:4001:821::2003"
+	
+	groups = [ "Unify-Server", "Webserver-intern" ]
+}
