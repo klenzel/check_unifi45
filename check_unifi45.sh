@@ -4,7 +4,7 @@
 #
 # check_unifi45
 #
-# Version 1.0.00
+# Version 1.0.01
 #
 # Ein Plugin für Icinga / Nagios
 # zur Überwachung und Auswertung eines 
@@ -19,7 +19,15 @@
 # - 'awk'
 # - 'curl'
 #
-# Beispiel für Debian: apt-get install jq awk curl
+# Beispiel für Debian: apt-get install jq curl
+#
+# ---------------------------------------------
+#
+# 1.0.01 - Changelog:
+#
+# 20170605
+# - Errorhandling beim Login an Unifi-Controller hinzugefügt
+# - Bugfixes
 #
 #############################################################
 
@@ -37,7 +45,7 @@ function showUsage {
   -p  Passwort
   
   -m  Modul
-      'Count-Users'       => Zeigt im WLAN angemeldet Nutzer an
+      'Count-Users'       => Zeigt im WLAN angemeldete Nutzer an
       'Active-Alarms'     => Anzahl der unbestätigten Alarm-Meldungen
       'Offline-APs'       => Anzahl der nicht verfügbaren Accesspoints
       'Has-Updates'       => Anzahl der Accesspoints, für die ein Update zur Verfügung steht
@@ -66,13 +74,13 @@ function showUsage {
                             Eingabe im Format: 'n'
       'Get-DeviceLoad'   => Ist die Load der letzten Minute größer als der angegebene Wert, wird der Status 'Warning' ausgeben
                             Eingabe im Format: 'n.nn'
-      'Get-DeviceMem'    =>
+      'Get-DeviceMem'    => Ist die Auslastung des Arbeitsspeichers höher als der angegebene Wert, wird der Status 'Warning' ausgeben
                             Eingabe im Format: 'nn' (z.B. '80' für 80% Auslastung)
-      'Get-DeviceUsers'   => Gibt die maximal Anzahl der mit einem AP verbundenen Nutzer an, ab der der Status 'Warning' ausgegeben wird
+      'Get-DeviceUsers'  => Gibt die maximale Anzahl der mit einem AP verbundenen Nutzer an, ab der der Status 'Warning' ausgegeben wird
                             Eingabe im Format: 'n'
-      'Get-DeviceGuests' => Gibt die maximal Anzahl der mit einem AP verbundenen Gäste an, ab der der Status 'Warning' ausgegeben wird
+      'Get-DeviceGuests' => Gibt die maximale Anzahl der mit einem AP verbundenen Gäste an, ab der der Status 'Warning' ausgegeben wird
                             Eingabe im Format: 'n'
-      'Show-DevLastSeen' => Gibt die vergangenen Sekunden der letzten Sichtung an, ab der der Status 'Warning' ausgegeben wird
+      'Show-DevLastSeen' => Gibt die vergangenen Sekunden der letzten Sichtung an, ab die der Status 'Warning' ausgegeben wird
       
   -c  Angabe, unter welchem Wert der Status 'Critical' ausgegeben werden soll
       Erläuterungen analog zu 'Warning'
@@ -125,19 +133,19 @@ fi
 
 strJQBinary=$(which jq)
 if [ $? -ne 0 ] ; then
-  echo "Bitte den JSON-Prozessor '${strJQBinary}' installieren"
+  echo "Bitte den JSON-Prozessor ${strJQBinary} installieren"
   exit 3
 fi
 
 strCurlBinary=$(which curl)
 if [ $? -ne 0 ] ; then
-  echo "Bitte 'curl' installieren"
+  echo "Bitte das Paket curl installieren"
   exit 3
 fi
 
 strAWKBinary=$(which awk)
 if [ $? -ne 0 ] ; then
-  echo "Bitte 'awk' installieren"
+  echo "Bitte das Paket awk installieren"
   exit 3
 fi
 
@@ -150,7 +158,14 @@ strCurlCommand="${strCurlBinary} --tlsv1 --silent --cookie ${strCookieFile} --co
 strLogOutAndCleanUp="${strCurlCommand} $strBaseURL/logout > /dev/null 2>&1 ; rm -f ${strCookieFile}"
 
 #Anmelden am Controller
-${strCurlCommand} --data "{'username':'$strUsername', 'password':'$strPassword'}" $strBaseURL/api/login > /dev/null 2>&1
+strLoginStatus=$(${strCurlCommand} --data "{'username':'$strUsername', 'password':'$strPassword'}" $strBaseURL/api/login | ${strJQBinary} '.meta.rc')
+
+if [ $strLoginStatus != "\"ok\"" ] ; then
+  echo "Unknown: Anmeldung am Unifi-Controller fehlgeschlagen"
+  eval ${strLogOutAndCleanUp}
+  exit 2
+fi
+
 
 #Sites ermitteln
 arrSites=$(${strCurlCommand} $strBaseURL/api/self/sites | ${strJQBinary} -r '.data[].name')
