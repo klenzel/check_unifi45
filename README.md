@@ -1,8 +1,7 @@
 # check_unifi45
-Nagios / Icinga-Plugin für den Unifi-Controller (Version >4)
+## Nagios / Icinga-Plugin für den Unifi-Controller (Version >4)
 
-Meta:
-#####
+###### Meta
 Ein Plugin für Icinga / Nagios
 zur Überwachung und Auswertung eines 
 Unifi-Controllers ab Version 4
@@ -10,20 +9,29 @@ Unifi-Controllers ab Version 4
 Urheber: Daniel Wenzel
 Kontakt: daniel@klenzel.de
 
-Installation
-############
-Abhängigkeiten:
-- 'jq'
-- 'awk'
-- 'curl'
+###### Installation
+1. Abhängigkeiten: installieren unter Debian:
+apt-get install jq curl
 
-Beispiel für Debian: apt-get install jq curl
+2. Plugin herunterladen und speichern:
+wget https://raw.githubusercontent.com/klenzel/check_unifi45/master/check_unifi45.sh -O /usr/lib/nagios/plugins/check_unifi45.sh
 
-Beispiele für die Konfigurartion von Icinga unter examples.txt!
+3. Ausführung ermöglichen:
+chmod + /usr/lib/nagios/plugins/check_unifi45.sh
 
-Benutzung:
-##########
--H  Hostname / IP-Adresse
+4. Nagios/Icinga-Konfiguration anpassen
+=> siehe examples.txt
+
+
+###### Hinweise
+Der Sitename ist nicht der Name des Bereichs, der von Hand im Unifi-Controller gesetzt wurde.
+Den Sitename kann man in der URL ablesen, wenn diese im Browser geöffnet ist.
+
+
+###### Benutzung
+Auszug aus der Hilfefunktion des Scripts:
+
+`-H  Hostname / IP-Adresse
 
 -P  Port (Standard = 8443)
 
@@ -70,4 +78,4 @@ Benutzung:
     'Show-DevLastSeen' => Gibt die vergangenen Sekunden der letzten Sichtung an, ab der der Status 'Warning' ausgegeben wird
     
 -c  Angabe, unter welchem Wert der Status 'Critical' ausgegeben werden soll
-    Erläuterungen analog zu 'Warning'
+    Erläuterungen analog zu 'Warning'`
